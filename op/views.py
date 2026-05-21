@@ -294,18 +294,51 @@ def obtener_imagen(request):
     if not ruta:
         raise Http404("Ruta no proporcionada")
 
-    # 🔥 decodificar
+    # Ruta original recibida
+    print("\n======================")
+    print("RUTA ORIGINAL:")
+    print(ruta)
+
+    # Decodificar URL
     ruta = unquote(ruta)
 
-    print("Ruta recibida:", ruta)  # DEBUG
+    print("\nRUTA DECODIFICADA:")
+    print(ruta)
 
+    # Convertir ruta Windows -> Linux
+    ruta = ruta.replace(
+        r"\\SrvMercicoSAS\GestionDeProcesos",
+        "/imagenes"
+    )
+
+    # Backslashes -> slashes
+    ruta = ruta.replace("\\", "/")
+
+    print("\nRUTA FINAL CONVERTIDA:")
+    print(ruta)
+
+    # Verificaciones
+    print("\nEXISTE?:", os.path.exists(ruta))
+    print("ABSOLUTA:", os.path.abspath(ruta))
+
+    carpeta = "/imagenes/ControlDeCalidad/Aplicaciones/ImgFicProd"
+
+    print("\nARCHIVOS EN CARPETA:")
+    try:
+        for archivo in os.listdir(carpeta):
+            print(archivo)
+    except Exception as e:
+        print("ERROR LISTANDO:", e)
+
+    print("======================\n")
+
+    # Validar existencia
     if not os.path.exists(ruta):
-        print("NO EXISTE")
         raise Http404("Imagen no encontrada")
 
     tipo, _ = mimetypes.guess_type(ruta)
 
     return FileResponse(
-        open(ruta, 'rb'),
-        content_type=tipo or 'application/octet-stream'
+        open(ruta, "rb"),
+        content_type=tipo or "application/octet-stream"
     )

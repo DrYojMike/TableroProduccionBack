@@ -1,21 +1,16 @@
 from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-from pathlib import Path
 from dotenv import load_dotenv
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 load_dotenv(BASE_DIR / ".env")
+
 # ========================
 # SEGURIDAD
 # ========================
-SECRET_KEY = 'django-insecure-&&(v@)#7!-r1u=+=3x^j089lpjwh88%musxr0$6*zl1s2)*x!l'
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 # ========================
 # APLICACIONES
@@ -27,21 +22,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'rest_framework',
     'corsheaders',
-
     'clientes',
     'pedidos',
     'op',
 ]
-
-
 # ========================
 # MIDDLEWARE
 # ========================
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # IMPORTANTE
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,10 +42,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
-# ========================
-# URLS / TEMPLATES
-# ========================
 ROOT_URLCONF = 'Back.urls'
 
 TEMPLATES = [
@@ -73,123 +60,87 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Back.wsgi.application'
-
-
 # ========================
 # BASES DE DATOS
 # ========================
-from pathlib import Path
-from dotenv import load_dotenv
-import os
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
+        'ENGINE': os.getenv('DB_ENGINE', 'mssql'),
         'NAME': os.getenv('DB_NAME_DEFAULT'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'PORT': os.getenv('DB_PORT', ''),
         'OPTIONS': {
             'driver': os.getenv('DB_DRIVER'),
-        }
+            'extra_params': 'TrustServerCertificate=yes;Connection Timeout=60;',
+        },
     },
-
     'facturacion': {
-        'ENGINE': os.getenv('DB_ENGINE'),
+        'ENGINE': os.getenv('DB_ENGINE', 'mssql'),
         'NAME': os.getenv('DB_NAME_FACTURACION'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'PORT': os.getenv('DB_PORT', ''),
         'OPTIONS': {
             'driver': os.getenv('DB_DRIVER'),
-        }
+            'extra_params': 'TrustServerCertificate=yes;Connection Timeout=60;',
+        },
     },
-
     'inventario': {
-        'ENGINE': os.getenv('DB_ENGINE'),
+        'ENGINE': os.getenv('DB_ENGINE', 'mssql'),
         'NAME': os.getenv('DB_NAME_INVENTARIO'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'PORT': os.getenv('DB_PORT', ''),
         'OPTIONS': {
             'driver': os.getenv('DB_DRIVER'),
-        }
+            'extra_params': 'TrustServerCertificate=yes;Connection Timeout=60;',
+        },
     },
-
     'usuarios': {
-        'ENGINE': os.getenv('DB_ENGINE'),
+        'ENGINE': os.getenv('DB_ENGINE', 'mssql'),
         'NAME': os.getenv('DB_NAME_USUARIOS'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'PORT': os.getenv('DB_PORT', ''),
         'OPTIONS': {
             'driver': os.getenv('DB_DRIVER'),
-        }
+            'extra_params': 'TrustServerCertificate=yes;Connection Timeout=60;',
+        },
     },
 }
-
 
 # ========================
 # PASSWORDS
 # ========================
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
 ]
 
-
-# ========================
-# INTERNACIONALIZACIÓN
-# ========================
 LANGUAGE_CODE = 'es-co'
-
 TIME_ZONE = 'America/Bogota'
-
 USE_I18N = True
 USE_TZ = True
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# ========================
-# STATIC FILES
-# ========================
-STATIC_URL = 'static/'
-
-
-# ========================
-# DJANGO REST FRAMEWORK
-# ========================
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ]
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
 }
 
-
-# ========================
-# CORS (CLAVE PARA FRONTEND)
-# ========================
-
-# Para desarrollo (abre todo)
-CORS_ALLOW_ALL_ORIGINS = True
-
-# Si quieres restringir (mejor práctica)
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-# ]
-
+CORS_ALLOWED_ORIGINS = os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:3000"
+).split(",")
 CORS_ALLOW_CREDENTIALS = True
-
-
-# ========================
-# CSRF (IMPORTANTE PARA POST)
-# ========================
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
 ]
